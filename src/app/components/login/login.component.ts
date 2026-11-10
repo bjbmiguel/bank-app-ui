@@ -3,6 +3,7 @@ import { User } from "src/app/model/user.model";
 import { NgForm } from '@angular/forms';
 import { LoginService } from 'src/app/services/login/login.service';
 import { Router } from '@angular/router';
+import { getCookie } from 'typescript-cookie';
 
 
 @Component({
@@ -22,12 +23,18 @@ export class LoginComponent implements OnInit {
 
   }
 
+  //Access Token  -> Memória (RAM) -- em PRD
+  // Refresh Token -> Cookie HttpOnly Secure SameSite   -- em PRD
   validateUser(loginForm: NgForm) {
     this.loginService.validateLoginDetails(this.model).subscribe(
       responseData => {
         this.model = <any> responseData.body;
         this.model.authStatus = 'AUTH';
         window.sessionStorage.setItem("userdetails",JSON.stringify(this.model));
+        window.sessionStorage.setItem("Authorization",responseData.headers.get("Authorization")!);
+       let xscrf = getCookie("XSCRF-TOKEN")!;
+       window.sessionStorage.setItem("XSCRF", xscrf);
+
         this.router.navigate(['dashboard']);
       });
 
